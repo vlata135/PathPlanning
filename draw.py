@@ -65,7 +65,7 @@ class DRAW:
 
         # self.map_matrix = map.map_matrix
         
-        path = astar.Astar(31, 68)
+        path = astar.Astar(31, 500)
         print(path)
 
         # Create a map
