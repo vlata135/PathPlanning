@@ -18,8 +18,16 @@ class ROBOT:
             self.current_pos = self.current_pos + self.velocity
             self.trace.append(self.current_pos)
 
-    
-
+    def movetoGoal(self,goal, pre_goal):
+        if (goal - pre_goal) == 1:
+            self.velocity = np.array([1,0])
+        elif (goal - pre_goal) == -1:
+            self.velocity = np.array([-1,0])
+        elif (goal - pre_goal) == 30:
+            self.velocity = np.array([0,1])
+        elif (goal - pre_goal) == -30:
+            self.velocity = np.array([0,-1])
+        
         
 
     

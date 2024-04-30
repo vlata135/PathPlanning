@@ -44,7 +44,7 @@ class Algorithm:
                     dist[v] = new_dist
                     parent[v] = u
                     # Sử dụng hàm heuristic Mahattan để tối ưu hóa A*
-                    priority = new_dist + self.heuristic_manhattan(v, end)
+                    priority = new_dist + 10*self.heuristic_manhattan(v, end)
                     heappush(priority_queue, (priority, v))
                     # heappush(priority_queue, (new_dist, v))
 

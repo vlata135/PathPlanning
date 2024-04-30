@@ -5,6 +5,7 @@ from map import *
 import math
 import random
 from pathPlanning import *
+import time
 
 class DRAW:
     def __init__(self,map_matrix):
@@ -53,6 +54,8 @@ class DRAW:
     def drawMove(self,path):
         for point in path:
             pygame.draw.circle(self.screen, pygame.Color('blue'), self.centers[point], 4)
+        for point in path:
+            pygame.draw.circle(self.screen, pygame.Color('blue'), self.centers[point], 4)
 
     def plot(self):
         WHITE = (255, 255, 255)
@@ -60,29 +63,49 @@ class DRAW:
         RED = (255, 0, 0)
         GREEN = (0, 255, 0)
         BLUE = (0, 0, 255)
-
         
-
+        #469
+        init_point = 31
+        target_point = 867
+        init_pos = self.centers[init_point]
+        target_pos = self.centers[target_point]
+        
+        robot = ROBOT(init_pos)
         # self.map_matrix = map.map_matrix
         
-        path = astar.Astar(31, 500)
+        path = astar.Astar(init_point, target_point)
         print(path)
 
+        
         # Create a map
         running = True
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            self.screen.fill(WHITE)
-            self.draw_map()
+            # self.screen.fill(WHITE)
+            # self.draw_map()
+            if path != []:
+                pre_goal = path[0] - 1
+            while path != []:
+                self.screen.fill(WHITE)
+                self.draw_map()
+                self.drawMove(path)
+                
+                robot.movetoGoal(path[0], pre_goal)
+                print(np.linalg.norm(robot.current_pos - np.array(self.centers[path[0]])))
+                if np.linalg.norm(robot.current_pos - np.array(self.centers[path[0]])) < 1.5 and path != []:
+                    pre_goal = path[0]
+                    path.pop(0)
+                    # print(path[0], pre_goal)
+                robot.updatePose()
+                self.draw_robot(robot)
+                if path == []:
+                    break
 
-            self.drawMove(path)
             
-
-
-            pygame.display.flip()
-            self.clock.tick(120)
+                pygame.display.flip()
+                self.clock.tick(60)
             
         pygame.quit()
 
