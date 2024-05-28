@@ -1,5 +1,6 @@
 from heapq import *
 from collections import deque
+from draw import *
 
 class Algorithm:
     def __init__(self, adjacency_list,map_matrix):
@@ -21,7 +22,7 @@ class Algorithm:
 
     def Astar(self, start, end):
         inf = float('inf')
-
+        # draw = DRAW(self.map_matrix)
         # Khởi tạo mảng khoảng cách và đỉnh cha
         dist = {vertex: inf for vertex in self.adjacency_list}
         parent = {vertex: None for vertex in self.adjacency_list}
@@ -33,6 +34,10 @@ class Algorithm:
         priority_queue = [(0, start)]
 
         while priority_queue:
+            # draw.draw_finding_path(priority_queue)
+            # print(priority_queue)
+
+            # Lấy đỉnh u có khoảng cách ngắn nhất
             cur_dist, u = heappop(priority_queue)
 
             # Duyệt qua các đỉnh kề của u
@@ -43,16 +48,24 @@ class Algorithm:
                 if new_dist < dist[v]:
                     dist[v] = new_dist
                     parent[v] = u
+                    # print(parent[v])
                     # Sử dụng hàm heuristic Mahattan để tối ưu hóa A*
-                    priority = new_dist + 10*self.heuristic_manhattan(v, end)
+                    priority = new_dist + 0.1*self.heuristic_manhattan(v, end)
                     heappush(priority_queue, (priority, v))
                     # heappush(priority_queue, (new_dist, v))
 
         # Truy vết đường đi ngắn nhất từ end về start
         path = []
+        # print(dist[end])
+        cost = dist[end]
         cur_node = end
         while cur_node is not None:
             path.insert(0, cur_node)
             cur_node = parent[cur_node]
+            # print(parent) 
 
         return path
+    
+
+
+# if __name__ == "__main":
