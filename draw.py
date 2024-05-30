@@ -6,6 +6,7 @@ import math
 import random
 from pathPlanning import *
 import time
+from moveRule import *
 
 class DRAW:
     def __init__(self,map_matrix):
@@ -48,6 +49,9 @@ class DRAW:
         # pygame.draw.circle(self.screen, robot.color, (int(robot.current_pos[0]), int(robot.current_pos[1])), 15)
 
         pygame.draw.circle(self.screen, pygame.Color("chartreuse3"), robot.current_pos, self.tile_size/3,10)
+        font = pygame.font.Font(None, 24)
+        text = font.render(str(robot.robot_id), True, pygame.Color("black"))
+        self.screen.blit(text, robot.current_pos)
         # print(robot.current_pos)
         # for i in range(len(robot.trace)):
         #     pygame.draw.circle(self.screen, (255,215,0), (int(robot.trace[i][0]), int(robot.trace[i][1])), 2)
@@ -59,7 +63,7 @@ class DRAW:
         rows, cols = len(self.map_matrix), len(self.map_matrix[0])
         for row in range(rows):
             for col in range(cols):
-                if self.map_matrix[row][col] == 1:
+                if self.map_matrix[row][col] < 9:
                     pygame.draw.rect(self.screen, pygame.Color("white"), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
                     self.pos_posible.append(self.get_index(row, col))
                 elif self.map_matrix[row][col] == 2:
@@ -116,9 +120,9 @@ class DRAW:
         
         # #điểm khởi tạo
         # init_points = [301, 304, 307, 310, 313, 316]
-        init_points = [157, 117, 124, 131, 98, 41]
+        init_points = [2, 5, 8, 15, 11, 13]
         # #điểm đích
-        target_points = [36,31,149,71,378,364]
+        target_points = [215,250,150,72,378,364]
     
             
         
@@ -130,6 +134,7 @@ class DRAW:
         # # print(paths)
         
         for i in range(len(robots)):
+            robots[i].robot_id = i
             robots[i].path = paths[i]
             robots[i].centers = self.centers
             
@@ -166,15 +171,19 @@ class DRAW:
                     targett = self.pos_posible[random.randint(0, len(self.pos_posible)-1)]
                     robot.path = astar.Astar(self.get_robot_pos(robot.current_pos), targett)
                 
-                for other_robot in robots:
-                    if robot != other_robot:
-                        while( np.sqrt((robot.current_pos[0] - other_robot.current_pos[0])**2 + (robot.current_pos[1] - other_robot.current_pos[1])**2) < 30):   
-                            robot.velocity = [random.randint(-1,1), random.randint(-1,1)]
-                            # break
+                # for other_robot in robots:
+                #     if robot != other_robot:
+                        
+                        
+
                             
 
 
-                robot.followPath(robot.path)
+                if robot.status == 0:
+                    robot.followPath(robot.path)
+                else:
+                    robot.velocity = np.zeros(2)
+                
                 self.draw_robot(robot)
                 self.drawMove(robot.path)
             
@@ -200,7 +209,7 @@ class DRAW:
             
 
             pygame.display.flip()
-            self.clock.tick(30)
+            self.clock.tick(120)
             
         pygame.quit()
 
@@ -229,10 +238,13 @@ class DRAW:
 
 if __name__ == "__main__":
     
-    map = GRAPH("map.csv")
+    map = moveRule("map2.csv")
 
     astar = Algorithm(map.adj_list, map.map_matrix)
-    draw = DRAW(map.map_matrix)
+    print(map.map_matrix)
+
+    grid = GRAPH("map2_unmark.csv")
+    draw = DRAW(grid.map_matrix)
     # path = astar.Astar(0, 115)
     # print(draw.map_matrix)
 

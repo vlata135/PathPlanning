@@ -6,7 +6,8 @@ class GRAPH:
         self.filename = filename
         self.map_matrix = self.read_csv(filename)
         self.adj_list = self.create_weighted_adj_list()
-        
+        # self.map_matrix_moveRule = self.matrix_to_adjacency()
+        # self.adj_list_moveRule = self.matrix_to_adjacency_list()
         
     def create_weighted_adj_list(self):
         rows, cols = len(self.map_matrix), len(self.map_matrix[0])
@@ -68,6 +69,44 @@ class GRAPH:
                 map_data.append(list(result_list))
         # print(map_data)
         return map_data
+
+    def matrix_to_adjacency(self):
+        rows, cols = len(self.map_matrix), len(self.map_matrix[0])
+        adjacency_matrix = [[0] * (rows * cols) for _ in range(rows * cols)]
+
+        def index(row, col):
+            return row * cols + col
+
+        for row in range(rows):
+            for col in range(cols):
+                directions = self.map_matrix[row][col]
+                current_index = index(row, col)
+
+                if 'u' in directions and row > 0:
+                    adjacency_matrix[current_index][index(row - 1, col)] = 1
+                    
+                if 'd' in directions and row < rows - 1:
+                    adjacency_matrix[current_index][index(row + 1, col)] = 1
+                    
+                if 'l' in directions and col > 0:
+                    adjacency_matrix[current_index][index(row, col - 1)] = 1
+                
+                if 'r' in directions and col < cols - 1:
+                    adjacency_matrix[current_index][index(row, col + 1)] = 1
+                
+        return adjacency_matrix
+
+    def matrix_to_adjacency_list(self):
+        adjacency_list = {}
+
+        for i in range(len(self.map_matrix_moveRule)):
+            neighbors = []
+            for j in range(len(self.map_matrix_moveRule[i])):
+                if self.map_matrix_moveRule[i][j] > 0:
+                    neighbors.append((j, self.map_matrix_moveRule[i][j]))
+            adjacency_list[i] = neighbors
+
+        return adjacency_list
 
 if __name__ == "__main__":
     graph = GRAPH("map2_unmark.csv")

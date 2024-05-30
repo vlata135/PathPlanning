@@ -3,7 +3,8 @@ import pygame
 from map import *
 
 class ROBOT:
-    def __init__(self,initial_pos):    
+    def __init__(self,initial_pos):
+        self.robot_id = 0
         self.target_pos = np.array([0,0])
         self.current_pos = initial_pos
         self.velocity = np.zeros(2).astype(int)
@@ -12,6 +13,7 @@ class ROBOT:
         self.path = []
         self.centers = []
         self.prev_goal = 0
+        self.status = 0
         # self.map = map
     
     def updatePose(self):
