@@ -14,6 +14,7 @@ class ROBOT:
         self.centers = []
         self.prev_goal = 0
         self.status = 0
+        self.prev_order = 0
         # self.map = map
     
     def updatePose(self):

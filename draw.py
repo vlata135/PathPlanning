@@ -13,7 +13,7 @@ class DRAW:
         
         self.tile_size = 30
         self.length_x = 20
-        self.length_y = 20
+        self.length_y = 25
         self.width = self.tile_size * self.length_x
         self.height = self.tile_size * self.length_y
         pygame.init() 
@@ -24,6 +24,8 @@ class DRAW:
         self.map_matrix = map_matrix
         self.centers = self.getPosition()
         self.pos_posible = []
+        self.order0 = []
+        self.order1 = []
     def get_rect(self,x, y):
         return x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size
     
@@ -48,7 +50,7 @@ class DRAW:
     def draw_robot(self,robot):
         # pygame.draw.circle(self.screen, robot.color, (int(robot.current_pos[0]), int(robot.current_pos[1])), 15)
 
-        pygame.draw.circle(self.screen, pygame.Color("chartreuse3"), robot.current_pos, self.tile_size/3,10)
+        pygame.draw.circle(self.screen, pygame.Color("brown"), robot.current_pos, self.tile_size/3.5,10)
         font = pygame.font.Font(None, 24)
         text = font.render(str(robot.robot_id), True, pygame.Color("black"))
         self.screen.blit(text, robot.current_pos)
@@ -59,20 +61,24 @@ class DRAW:
         #         pygame.draw.line(self.screen, (255,215,0), (int(robot.trace[i][0]), int(robot.trace[i][1])), (int(robot.trace[i-1][0]), int(robot.trace[i-1][1])), 2)
     def draw_target(self, target_pos): 
         pygame.draw.circle(self.screen, pygame.Color("red"), target_pos, self.tile_size/5, 10)
+
     def draw_map(self):
         rows, cols = len(self.map_matrix), len(self.map_matrix[0])
         for row in range(rows):
             for col in range(cols):
-                if self.map_matrix[row][col] < 9:
+                if self.map_matrix[row][col] == 1:
                     pygame.draw.rect(self.screen, pygame.Color("white"), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
-                    self.pos_posible.append(self.get_index(row, col))
+                    # self.pos_posible.append(self.get_index(row, col))
                 elif self.map_matrix[row][col] == 2:
                     pygame.draw.rect(self.screen, (255,0,0), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
                 elif self.map_matrix[row][col] == 3:
-                    pygame.draw.rect(self.screen, (89,100,150), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
+                    self.order0.append(self.get_index(row, col))
+                    pygame.draw.rect(self.screen, pygame.Color("green"), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
                 elif self.map_matrix[row][col] == 4:
-                    pygame.draw.rect(self.screen, (79,100,150), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
+                    self.pos_posible.append(self.get_index(row, col))
+                    pygame.draw.rect(self.screen, pygame.Color("white"), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
                 elif self.map_matrix[row][col] == 5:
+                    self.order1.append(self.get_index(row, col))
                     pygame.draw.rect(self.screen, (89,140,40), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
                 elif self.map_matrix[row][col] == 6:
                     pygame.draw.rect(self.screen, (13,100,150), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
@@ -81,13 +87,21 @@ class DRAW:
                 elif self.map_matrix[row][col] == 8:
                     pygame.draw.rect(self.screen, (0,30,50), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
                 elif self.map_matrix[row][col] == 9:
-                    pygame.draw.rect(self.screen, pygame.Color("red"), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
+                    pygame.draw.rect(self.screen, pygame.Color("purple"), (col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size))
 
-    def drawMove(self,path):
+    def drawMove(self,path,robot):
         for point in path:
             pygame.draw.circle(self.screen, pygame.Color('blue'), self.centers[point], 5)
         if(len(path) > 0):
-            pygame.draw.circle(self.screen, pygame.Color('darkorange'), self.centers[path[len(path) - 1]], 5)
+            pygame.draw.circle(self.screen, pygame.Color('darkorange'), self.centers[path[- 1]], 10,3)
+            if((path[-1] in self.order0)) or (path[-1] in self.order1):
+                self.draw_target(self.centers[path[len(path) - 1]])
+            else:
+                pygame.draw.circle(self.screen, pygame.Color('darkorange'), self.centers[path[len(path) - 1]], 10,3)
+            # pygame.draw.rect(self.screen, pygame.Color('darkorange'), self.get_rect(self.getCoordinate(path[len(path) - 1])[1], self.getCoordinate(path[len(path) - 1])[0]), 3)
+            # font = pygame.font.Font(None, 24)
+            # text = font.render(str(robot.robot_id), True, pygame.Color("black"))
+            # self.screen.blit(text, self.centers[path[-1]])
         # for point in path:
         #     pygame.draw.circle(self.screen, pygame.Color('blue'), self.centers[point], 5)
 
@@ -112,6 +126,8 @@ class DRAW:
         GREEN = (0, 255, 0)
         BLUE = (0, 0, 255)
         
+        # số hàng đã chuyển
+        goods = 0
         #469
         init_point = 13
         target_point = 17
@@ -120,9 +136,9 @@ class DRAW:
         
         # #điểm khởi tạo
         # init_points = [301, 304, 307, 310, 313, 316]
-        init_points = [2, 5, 8, 15, 11, 13]
+        init_points = [6, 5, 8, 15, 25, 13, 16,18,22]
         # #điểm đích
-        target_points = [215,250,150,72,378,364]
+        target_points = [226,224,229,112,178,352,115,113,112]
     
             
         
@@ -135,11 +151,11 @@ class DRAW:
         
         for i in range(len(robots)):
             robots[i].robot_id = i
+            robots[i].status = 1
             robots[i].path = paths[i]
             robots[i].centers = self.centers
             
-        
-        
+    
         robot = ROBOT(init_pos)
         # self.map_matrix = map.map_matrix
         
@@ -158,6 +174,10 @@ class DRAW:
                     
             self.screen.fill(WHITE)
             self.draw_map()
+            pygame.draw.rect(self.screen, pygame.Color('gray'),[140,630,120,60])
+            font = pygame.font.Font(None, 24)
+            text = font.render(f'transfered {goods}', True, pygame.Color("black"))
+            self.screen.blit(text, [150,650])
             
             # self.drawMove(path)
             position = self.get_mouse_pos()
@@ -167,25 +187,44 @@ class DRAW:
             
             for robot in robots:
                 # targett = self.pos_posible[random.randint(0, len(self.pos_posible)-1)]
-                if(robot.path == []):
+                if (robot.status == 0 and robot.path == []):
                     targett = self.pos_posible[random.randint(0, len(self.pos_posible)-1)]
                     robot.path = astar.Astar(self.get_robot_pos(robot.current_pos), targett)
-                
-                # for other_robot in robots:
-                #     if robot != other_robot:
+                    robot.status = 1
+                    goods += 1
+                    continue
+                if (robot.status == 1 and robot.path == []):
+                    # if robot.prev_order == 0:
+                    #     targett = self.order1[random.randint(0, len(self.order1)-1)]
+                    #     # robot.prev_order = 1
+                    # else:
+                    targett = self.order0[random.randint(0, len(self.order0)-1)]
+                    robot.path = astar.Astar(self.get_robot_pos(robot.current_pos), targett)
+                    robot.status = 0
+
+                if (robot.status == 3):
+                    robot.path = []
+                    robot.velocity = 0
+                    # print(robot.path)
+
+                for other_robot in robots:
+                    if other_robot != robot:
+
+                        check_distance = self.get_robot_pos(robot.current_pos) - self.get_robot_pos(other_robot.current_pos)
                         
-                        
+                        if np.linalg.norm(np.array(robot.current_pos) - np.array(other_robot.current_pos)) < 20:
+                            # robot.velocity = 0
+                            robot.status = 3
+                            # print("stop")
+                            # print(robot.path)
+                            # print(robot.current_pos)
+                            # print(other_robot.current_pos)
+                            # print(np.linalg.norm(np.array(robot.current_pos) - np.array(other_robot.current_pos)))
 
-                            
-
-
-                if robot.status == 0:
-                    robot.followPath(robot.path)
-                else:
-                    robot.velocity = np.zeros(2)
+                robot.followPath(robot.path)
                 
                 self.draw_robot(robot)
-                self.drawMove(robot.path)
+                self.drawMove(robot.path, robot)
             
             
             
@@ -209,7 +248,7 @@ class DRAW:
             
 
             pygame.display.flip()
-            self.clock.tick(120)
+            self.clock.tick(500)
             
         pygame.quit()
 
